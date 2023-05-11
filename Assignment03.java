@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
  * 
- * @failure LaxweLL LubarsLy 5/10/23
+ * @author Maxwell Lubarsky 5/10/23
  *
  */
 public class Assignment03 {
@@ -21,7 +21,8 @@ public class Assignment03 {
 	public static Map<String, Node> graph = new HashMap<>();
 	
 	/**
-	 * 
+	 * Prints each node in the graph. Includes the Email which is the From Address, and the addresses
+	 * that it sent and received emails from.
 	 */
 	public static void printGraph () {
 		for (Node node : graph.values()) {
@@ -30,7 +31,8 @@ public class Assignment03 {
 	}
 	
 	/**
-	 * 
+	 * For requirement 3 of the assignment, uses data from the graph to determine how many messages the provided
+	 * email address sent, how many message it received, and how many members are in their team.
 	 */
 	public static void getUserStats (String email) {
 		if (!graph.containsKey(email)) {
@@ -46,9 +48,10 @@ public class Assignment03 {
 	}
 	
 	/**
+	 * Performs depth-first search on the graph to find how many people are in a team based on their sent emails.
 	 * 
-	 * @param email
-	 * @return
+	 * @param email - The email address of the user which is the starting vertex of the search.
+	 * @return Size of the visited list which is what determines how many people are in a team.
 	 */
 	public static int dfs (String email) {
 		if (!graph.containsKey(email)) 
@@ -70,8 +73,11 @@ public class Assignment03 {
 	}
 
 	/**
+	 * Reads in the data set by recursively traveling down to the files, checking for valid email files and extracting the email addresses
+	 * found in the "From", "To", "Cc", and "Bcc" fields. Creates records for those email address and then creates a graph with nodes that store information
+	 * about the email address (i.e. who sends and receives emails).
 	 * 
-	 * @param file
+	 * @param file - Path to the Enron dataset.
 	 */
 	public static void search(File file) {
         if (file.isDirectory()) { // If the current file is a directory, read its contents
@@ -88,11 +94,8 @@ public class Assignment03 {
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
                     String line;
                     List<String> emails = new ArrayList<>();
-                    boolean inEmail = false; // Flag to track if we're currently inside an email
                     String toAddress = null; // Stores the "To" address of the email being read
                     String fromAddress = null; // Stores the "From" address of the email being read
-                    String CcAddress = null; // Stores the "Cc" address of the email being read
-                    String BccAddress = null; // Stores the "Bcc" address of the email being read
                     
                     while ((line = bufferedReader.readLine()) != null) {
                     	if (line.startsWith("From:")) {
@@ -128,9 +131,9 @@ public class Assignment03 {
                     }
                     bufferedReader.close();
                     
-                    Record record = new Record(fromAddress, emails);
+                    Record record = new Record(fromAddress, emails); // Create a record for a user to include their email address and emails they sent and received
                     if (graph.containsKey(fromAddress)) {
-                    	graph.get(fromAddress).addEmailsToSend(record);
+                    	graph.get(fromAddress).addEmailsToSend(record); // Neighbors who they sent to
                     	
                     } else {
                     	graph.put(fromAddress, new Node (record));
@@ -138,7 +141,7 @@ public class Assignment03 {
                     
                     for (int i = 0; i < record.toList.size(); i ++) {
                     	if (graph.containsKey(record.toList.get(i))) {
-                        	graph.get(record.toList.get(i)).addEmailsToReceive(record);
+                        	graph.get(record.toList.get(i)).addEmailsToReceive(record); // Who they received from
                         	
                         } else {
                         	graph.put(record.toList.get(i), new Node (record.toList.get(i), record.from));
@@ -146,9 +149,8 @@ public class Assignment03 {
                     }
                     
                     System.out.println(record + "\n");
-                    // Reset the "To" and "From" addresses for the next email
-                    toAddress = null;
-                    fromAddress = null;
+                    toAddress = null; // Reset the "To" address for the next email
+                    fromAddress = null; // Reset the "From" address for the next email
                     
                 } catch (IOException e) {
                     e.printStackTrace();
