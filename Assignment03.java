@@ -39,22 +39,60 @@ public class Assignment03 {
 		}
 	}
 	
+	public static void dfsAP (String email) {
+		if (!graph.containsKey(email)) 
+			return;
+		Node node = graph.get(email);
+		List<String> visited = new ArrayList<>();
+		Stack<Node> stack = new Stack<>();
+		stack.add(node);
+		int dfsnum = 0;
+		while (!stack.isEmpty()) {
+			Node currentNode = stack.pop();
+			visited.add(currentNode.email);
+			currentNode.dfsnum = dfsnum;
+			currentNode.back = dfsnum;
+			dfsnum++;
+			for (int i = 0; i < currentNode.sentEmails.size(); i++) {
+				if (!visited.contains(currentNode.sentEmails.get(i))) {
+					stack.add(graph.get(currentNode.sentEmails.get(i)));
+				}
+			}
+		}	
+	}
+	
 	/**
 	 * Performs depth-first search on the graph to find how many people are in a team based on their sent emails.
 	 * 
 	 * @param email - The email address of the user which is the starting vertex of the search.
 	 * @return Size of the visited list which is what determines how many people are in a team.
 	 */
-	public static int dfs (String email) {
+	public static int dfs(String email) {
 		if (!graph.containsKey(email)) 
 			return 0;
 		Node node = graph.get(email);
 		List<String> visited = new ArrayList<>();
 		Queue<Node> queue = new LinkedList<>();
 		queue.add(node);
+		int dfsnum = 0;
 		while (!queue.isEmpty()) {
 			Node currentNode = queue.remove();
 			visited.add(currentNode.email);
+			currentNode.dfsnum = dfsnum;
+			currentNode.back = dfsnum;
+			dfsnum++;
+			
+//			)When the DFS backs up from a neighbor, w, to v, if dfsnum(v) > back(w), then back(v) is
+//			set to min(back(v), back(w)
+//			if (currentNode.dfsnum > node.back) {
+//				node.back = Math.min(currentNode.back, node.back);
+//			}
+//			
+////			If a neighbor, w, is already visited then back(v) is set to min(back(v),dfsnum(w))
+//			if (visited.contains(node.sentEmails.get(i)) {
+//				node.back = Math.min(currentNode.back, node.dfsnum);
+//			}
+			
 			for (int i = 0; i < currentNode.sentEmails.size(); i++) {
 				if (!visited.contains(currentNode.sentEmails.get(i))) {
 					queue.add(graph.get(currentNode.sentEmails.get(i)));
@@ -159,7 +197,7 @@ public class Assignment03 {
 		String directoryPath = "C:/Users/mluba/Downloads/maildir_test";
 		File directory = new File(directoryPath); // create a File object
         search(directory);
-        //printGraph();
+        printGraph();
         Scanner scnr = new Scanner(System.in);
         while (true) {
         	System.out.println("Email address of the individual (or EXIT to quit): ");
