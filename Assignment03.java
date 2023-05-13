@@ -1,16 +1,8 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.*;
+import java.util.*;
+
 /**
  * 
  * @author Maxwell Lubarsky 5/10/23
@@ -71,6 +63,7 @@ public class Assignment03 {
 		}
 		return visited.size();
 	}
+	
 
 	/**
 	 * Reads in the data set by recursively traveling down to the files, checking for valid email files and extracting the email addresses
@@ -148,7 +141,7 @@ public class Assignment03 {
                         }
                     }
                     
-                    System.out.println(record + "\n");
+                    //System.out.println(record + "\n");
                     toAddress = null; // Reset the "To" address for the next email
                     fromAddress = null; // Reset the "From" address for the next email
                     
@@ -160,12 +153,13 @@ public class Assignment03 {
     }
 	
 	public static void main(String[] args) {
-		// REAL FILE: String directoryPath = "C:/enron/enron_mail_20150507.tar/enron_mail_20150507/maildir"; 
+		// REAL FILE: 
+		//String directoryPath = "C:/enron/enron_mail_20150507.tar/enron_mail_20150507/maildir"; 
 		// TEST FILE:
 		String directoryPath = "C:/Users/mluba/Downloads/maildir_test";
 		File directory = new File(directoryPath); // create a File object
         search(directory);
-        printGraph();
+        //printGraph();
         Scanner scnr = new Scanner(System.in);
         while (true) {
         	System.out.println("Email address of the individual (or EXIT to quit): ");
