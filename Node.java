@@ -1,5 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Node {
 
@@ -8,7 +7,7 @@ public class Node {
 	List<String> sentEmails = new ArrayList<>();
 	List<String> receivedEmails = new ArrayList<>();
 	boolean visited = false;
-	int dfsNum = 0;
+	int dfsnum = 0;
 	int back = 0;
 	
 	/**
@@ -74,3 +73,4 @@ public class Node {
 		receivedEmails.add(record.from);
 	}
 }
+
