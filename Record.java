@@ -22,6 +22,5 @@ public class Record {
 	 */
 	public String toString () {
 		return "From: " + this.from + "\nTo: " + this.toList;
-	}
-	
+	}	
 }
