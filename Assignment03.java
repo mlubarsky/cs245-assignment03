@@ -11,16 +11,8 @@ import java.util.*;
 public class Assignment03 {
 	
 	public static Map<String, Node> graph = new HashMap<>();
-	
-	/**
-	 * Prints each node in the graph. Includes the Email which is the From Address, and the addresses
-	 * that it sent and received emails from.
-	 */
-	public static void printGraph () {
-		for (Node node : graph.values()) {
-			System.out.println(node);
-		}
-	}
+	public static int messageCount;
+	public static int emailCount;
 	
 	/**
 	 * For requirement 3 of the assignment, uses data from the graph to determine how many messages the provided
@@ -38,29 +30,79 @@ public class Assignment03 {
 			System.out.println("* " +  email +  " is in a team with " + teamsSize + " individuals\n");
 		}
 	}
-	
-	public static void dfsAP (String email) {
-		if (!graph.containsKey(email)) 
-			return;
-		Node node = graph.get(email);
-		List<String> visited = new ArrayList<>();
-		Stack<Node> stack = new Stack<>();
-		stack.add(node);
-		int dfsnum = 0;
-		while (!stack.isEmpty()) {
-			Node currentNode = stack.pop();
-			visited.add(currentNode.email);
-			currentNode.dfsnum = dfsnum;
-			currentNode.back = dfsnum;
-			dfsnum++;
-			for (int i = 0; i < currentNode.sentEmails.size(); i++) {
-				if (!visited.contains(currentNode.sentEmails.get(i))) {
-					stack.add(graph.get(currentNode.sentEmails.get(i)));
-				}
+
+	/**
+	 * Finds the articulation points in the graph.
+	 * @param graph - The graph.
+	 * @return A list of articulation points.
+	 */
+	public static List<Node> findArticulationPoints(Map<String, Node> graph) { 
+		List<Node> articulationPoints = new ArrayList<>();
+		int time = 0;
+		
+		// Loop over the nodes in the graph
+		for (Node node : graph.values()) {
+			if (!node.visited) {
+				dfs(node, node, time, articulationPoints);
 			}
-		}	
+		}
+       
+		
+		return articulationPoints;
 	}
-	
+
+	/**
+	 * Performs depth-first search on the graph to find articulation points.
+	 * @param node - The current node being visited.
+	 * @param parent - The parent of the current node.
+	 * @param time - The current time.
+	 * @param articulationPoints - The list of articulation points.
+	 */
+	private static void dfs(Node node, Node parent, int time, List<Node> articulationPoints) {
+		node.visited = true;
+		node.dfsnum = time;
+		node.back = time;
+		time++;
+		
+		int childCount = 0;
+		boolean isArticulationPoint = false;
+		
+		// Loop over the neighbors of the current node
+		for (String neighborName : node.neighbors) { // Change to node.sentEmails or node.receivedEmails based the direction of the neighbor in the graph
+			Node neighbor = graph.get(neighborName);
+			
+			// If the neighbor has not been visited, then visit it
+			if (!neighbor.visited) {
+				neighbor.parent = node;
+				childCount++;
+				// Recursively call dfs on the neighbor
+				dfs(neighbor, node, time, articulationPoints);
+				
+				// If the back number of the neighbor is greater than or equal to the dfs number of the current node
+				// then the current node is an articulation point
+				if (neighbor.back >= node.dfsnum && parent != null) {
+					isArticulationPoint = true;
+				}
+				
+				// Update the back number of the current node to be the minimum of its current back number and the back number of its neighbor
+				node.back = Math.min(node.back, neighbor.back);
+			} else if (!neighbor.equals(parent)) {
+				// If the neighbor has already been visited and it is not the parent of the current node, then update the back number of the current node
+				node.back = Math.min(node.back, neighbor.dfsnum);
+			}
+		}
+		
+		// If the current node is the root of the DFS tree and it has more than one child, then it is an articulation point
+		if (parent == null && childCount > 1) {
+			isArticulationPoint = true;
+		}
+		
+		// If the current node is an articulation point, add it to the list of articulation points
+		if (isArticulationPoint) {
+			articulationPoints.add(node);
+		}
+	}
+
 	/**
 	 * Performs depth-first search on the graph to find how many people are in a team based on their sent emails.
 	 * 
@@ -68,41 +110,32 @@ public class Assignment03 {
 	 * @return Size of the visited list which is what determines how many people are in a team.
 	 */
 	public static int dfs(String email) {
-		if (!graph.containsKey(email)) 
+		if (!graph.containsKey(email)) {
 			return 0;
+		}
+		
 		Node node = graph.get(email);
 		List<String> visited = new ArrayList<>();
-		Queue<Node> queue = new LinkedList<>();
-		queue.add(node);
-		int dfsnum = 0;
-		while (!queue.isEmpty()) {
-			Node currentNode = queue.remove();
-			visited.add(currentNode.email);
-			currentNode.dfsnum = dfsnum;
-			currentNode.back = dfsnum;
-			dfsnum++;
-			
-//			)When the DFS backs up from a neighbor, w, to v, if dfsnum(v) > back(w), then back(v) is
-//			set to min(back(v), back(w)
-//			if (currentNode.dfsnum > node.back) {
-//				node.back = Math.min(currentNode.back, node.back);
-//			}
-//			
-////			If a neighbor, w, is already visited then back(v) is set to min(back(v),dfsnum(w))
-//			if (visited.contains(node.sentEmails.get(i)) {
-//				node.back = Math.min(currentNode.back, node.dfsnum);
-//			}
-			
-			for (int i = 0; i < currentNode.sentEmails.size(); i++) {
-				if (!visited.contains(currentNode.sentEmails.get(i))) {
-					queue.add(graph.get(currentNode.sentEmails.get(i)));
+		Stack<Node> stack = new Stack<>();
+		int count = 0;
+		
+		stack.push(node);
+		while (!stack.isEmpty()) {
+			Node currentNode = stack.pop();
+			if (!visited.contains(currentNode.email)) {
+				visited.add(currentNode.email);
+				count++;
+				for (int i = 0; i < currentNode.neighbors.size(); i++) {
+					if (!visited.contains(currentNode.neighbors.get(i))) {
+						stack.push(graph.get(currentNode.neighbors.get(i)));
+					}
 				}
 			}
 		}
-		return visited.size();
+	
+		return count;
 	}
 	
-
 	/**
 	 * Reads in the data set by recursively traveling down to the files, checking for valid email files and extracting the email addresses
 	 * found in the "From", "To", "Cc", and "Bcc" fields. Creates records for those email address and then creates a graph with nodes that store information
@@ -162,12 +195,14 @@ public class Assignment03 {
                     }
                     bufferedReader.close();
                     
+					messageCount++;
                     Record record = new Record(fromAddress, emails); // Create a record for a user to include their email address and emails they sent and received
                     if (graph.containsKey(fromAddress)) {
                     	graph.get(fromAddress).addEmailsToSend(record); // Neighbors who they sent to
                     	
                     } else {
                     	graph.put(fromAddress, new Node (record));
+						emailCount++;
                     }
                     
                     for (int i = 0; i < record.toList.size(); i ++) {
@@ -176,6 +211,7 @@ public class Assignment03 {
                         	
                         } else {
                         	graph.put(record.toList.get(i), new Node (record.toList.get(i), record.from));
+							emailCount++;
                         }
                     }
                     
@@ -190,14 +226,43 @@ public class Assignment03 {
         }
     }
 	
+	/**
+	 * Prints each node in the graph. Includes the Email which is the From Address, and the addresses
+	 * that it sent and received emails from.
+	 */
+	public static void printGraph () {
+		for (Node node : graph.values()) {
+			System.out.println(node);
+		}
+	}
+	
+	/**
+	 * Prints the email addresses who are articulation points/connectors in the graphs.
+	 * @param articulationPoints - List of articulation points.
+	 */
+	public static void printArticulationPoints (List<Node> articulationPoints) {
+		System.out.println("Total number of emails: " + messageCount);
+		System.out.println("Total number of unique email addresses: " + emailCount);
+		System.out.println("Articulation Points: " + articulationPoints.size());
+		for(Node n : articulationPoints) {
+			System.out.println(n.email);
+		}
+		System.out.println();
+	}
+	
 	public static void main(String[] args) {
-		// REAL FILE: 
-		//String directoryPath = "C:/enron/enron_mail_20150507.tar/enron_mail_20150507/maildir"; 
-		// TEST FILE:
-		String directoryPath = "C:/Users/mluba/Downloads/maildir_test";
+		String directoryPath = args[0];
 		File directory = new File(directoryPath); // create a File object
         search(directory);
-        printGraph();
+
+        //if (args.length == 2) {
+        	List<Node> articulationPoints = findArticulationPoints(graph);
+    		printArticulationPoints(articulationPoints);
+//        } else {
+//        	List<Node> articulationPoints = findArticulationPoints(graph, null);
+//        	printArticulationPoints(articulationPoints);
+//        }
+
         Scanner scnr = new Scanner(System.in);
         while (true) {
         	System.out.println("Email address of the individual (or EXIT to quit): ");
