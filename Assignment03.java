@@ -32,40 +32,39 @@ public class Assignment03 {
 	}
 
 	/**
-	 * Finds the articulation points in the graph.
+	 * Finds the connectors in the graph.
 	 * @param graph - The graph.
-	 * @return A list of articulation points.
+	 * @return A list of connectors.
 	 */
-	public static List<Node> findArticulationPoints(Map<String, Node> graph) { 
-		List<Node> articulationPoints = new ArrayList<>();
+	public static List<Node> findConnectors(Map<String, Node> graph) {
+		List<Node> connectors = new ArrayList<>();
 		int time = 0;
 		
 		// Loop over the nodes in the graph
 		for (Node node : graph.values()) {
 			if (!node.visited) {
-				dfs(node, node, time, articulationPoints);
+				dfs(node, node, time, connectors);
 			}
 		}
-       
 		
-		return articulationPoints;
+		return connectors;
 	}
 
 	/**
-	 * Performs depth-first search on the graph to find articulation points.
+	 * Performs depth-first search on the graph to find connectors.
 	 * @param node - The current node being visited.
 	 * @param parent - The parent of the current node.
 	 * @param time - The current time.
-	 * @param articulationPoints - The list of articulation points.
+	 * @param connectors - The list of connectors.
 	 */
-	private static void dfs(Node node, Node parent, int time, List<Node> articulationPoints) {
+	private static void dfs(Node node, Node parent, int time, List<Node> connectors) {
 		node.visited = true;
 		node.dfsnum = time;
 		node.back = time;
 		time++;
 		
 		int childCount = 0;
-		boolean isArticulationPoint = false;
+		boolean isConnector = false;
 		
 		// Loop over the neighbors of the current node
 		for (String neighborName : node.neighbors) { // Change to node.sentEmails or node.receivedEmails based the direction of the neighbor in the graph
@@ -76,12 +75,12 @@ public class Assignment03 {
 				neighbor.parent = node;
 				childCount++;
 				// Recursively call dfs on the neighbor
-				dfs(neighbor, node, time, articulationPoints);
+				dfs(neighbor, node, time, connectors);
 				
 				// If the back number of the neighbor is greater than or equal to the dfs number of the current node
-				// then the current node is an articulation point
+				// then the current node is an connector
 				if (neighbor.back >= node.dfsnum && parent != null) {
-					isArticulationPoint = true;
+					isConnector = true;
 				}
 				
 				// Update the back number of the current node to be the minimum of its current back number and the back number of its neighbor
@@ -94,12 +93,12 @@ public class Assignment03 {
 		
 		// If the current node is the root of the DFS tree and it has more than one child, then it is an articulation point
 		if (parent == null && childCount > 1) {
-			isArticulationPoint = true;
+			isConnector = true;
 		}
 		
 		// If the current node is an articulation point, add it to the list of articulation points
-		if (isArticulationPoint) {
-			articulationPoints.add(node);
+		if (isConnector) {
+			connectors.add(node);
 		}
 	}
 
@@ -150,7 +149,6 @@ public class Assignment03 {
                 search(f); // Recursive call on search to traverse through the directories
             }
         } else {
-            String fileName = file.getName();
             if (!file.isDirectory()) { // If the current file is a text file, read its contents
                 try {
                 	
@@ -158,7 +156,6 @@ public class Assignment03 {
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
                     String line;
                     List<String> emails = new ArrayList<>();
-                    String toAddress = null; // Stores the "To" address of the email being read
                     String fromAddress = null; // Stores the "From" address of the email being read
                     
                     while ((line = bufferedReader.readLine()) != null) {
@@ -215,8 +212,6 @@ public class Assignment03 {
                         }
                     }
                     
-                    //System.out.println(record + "\n");
-                    toAddress = null; // Reset the "To" address for the next email
                     fromAddress = null; // Reset the "From" address for the next email
                     
                 } catch (IOException e) {
@@ -237,16 +232,24 @@ public class Assignment03 {
 	}
 	
 	/**
-	 * Prints the email addresses who are articulation points/connectors in the graphs.
-	 * @param articulationPoints - List of articulation points.
+	 * Prints the email addresses who are connectors in the graphs.
+	 * @param connectors - List of connectors.
 	 */
-	public static void printArticulationPoints (List<Node> articulationPoints) {
-		System.out.println("Total number of emails: " + messageCount);
-		System.out.println("Total number of unique email addresses: " + emailCount);
-		System.out.println("Articulation Points: " + articulationPoints.size());
-		for(Node n : articulationPoints) {
-			System.out.println(n.email);
+	public static void printConnectors (List<Node> connectors, String outFile) {
+		try (FileWriter writer = new FileWriter(outFile)) {
+			System.out.println("Total number of emails: " + messageCount);
+			System.out.println("Total number of unique email addresses: " + emailCount);
+			System.out.println("Connectors: " + connectors.size());
+			if (writer != null) {
+	            for (Node node : connectors) {
+	            	writer.write(node.email + "\n");
+	    			System.out.println(node.email);
+	    		}
+	        } 
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+	
 		System.out.println();
 	}
 	
@@ -255,13 +258,18 @@ public class Assignment03 {
 		File directory = new File(directoryPath); // create a File object
         search(directory);
 
-        //if (args.length == 2) {
-        	List<Node> articulationPoints = findArticulationPoints(graph);
-    		printArticulationPoints(articulationPoints);
-//        } else {
-//        	List<Node> articulationPoints = findArticulationPoints(graph, null);
-//        	printArticulationPoints(articulationPoints);
-//        }
+        if (args.length == 2) {
+        	List<Node> connectors = findConnectors(graph);
+    		printConnectors(connectors, args[1]);
+        } else {
+        	List<Node> connectors = findConnectors(graph);
+        	System.out.println("Total number of emails: " + messageCount);
+			System.out.println("Total number of unique email addresses: " + emailCount);
+			System.out.println("Connectors: " + connectors.size());
+			for (Node node : connectors) {
+    			System.out.println(node.email);
+    		}
+        }
 
         Scanner scnr = new Scanner(System.in);
         while (true) {
