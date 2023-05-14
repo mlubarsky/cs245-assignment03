@@ -78,7 +78,7 @@ public class Node {
 	}
 
 	/**
-	 * Function to add the emaila address as a neighbor.
+	 * Function to add the email address as a neighbor.
 	 * 
 	 * @param email - Email address.
 	 */
