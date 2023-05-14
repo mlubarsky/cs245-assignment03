@@ -14,7 +14,6 @@ public class Record {
 	public Record (String from, List<String> emails) {
 		this.from = from;
 		this.toList = emails;
-		
 	}
 	
 	/**
