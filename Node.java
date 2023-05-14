@@ -6,15 +6,17 @@ public class Node {
 	public String name = "";
 	List<String> sentEmails = new ArrayList<>();
 	List<String> receivedEmails = new ArrayList<>();
+	List<String> neighbors = new ArrayList<>();
 	boolean visited = false;
 	int dfsnum = 0;
 	int back = 0;
+	public Node parent;
 	
 	/**
 	 * Node constructor for when a record is passed in. Creates a Node which includes the "From" email
 	 * address and calls the list of emails to send to function.
 	 * 
-	 * @param record - Made up of "From" address and a List of email address in contact with "From".
+	 * @param record - Made up of an email address and a List of neighboring emails.
 	 */
 	public Node (Record record) {
 		email = record.from;
@@ -26,7 +28,7 @@ public class Node {
 	 * Creates a Node which includes the main email address and adds the address of the person who they
 	 * received from.
 	 * 
-	 * @param email - "From" email address.
+	 * @param email - Email address.
 	 * @param received - Email address which the main email receives from.
 	 */
 	public Node (String email, String received) {
@@ -44,9 +46,9 @@ public class Node {
 	}
 
 	/**
-	 * Method to add the email addresses which someone sends to, known as Neighbors.
+	 * Function to add the email addresses which someone sends to, known as Neighbors.
 	 * 
-	 * @param record - Made up of "From" address and a List of email address in contact with "From".
+	 * @param record - Made up of an email address and a List of neighboring emails.
 	 */
 	public void addEmailsToSend(Record record) {
 		for (String toEmail : record.toList) {
@@ -55,14 +57,15 @@ public class Node {
 			} else if (sentEmails.contains(toEmail)) {
 				continue;
 			}
+			addNeighbor(toEmail);
 			sentEmails.add(toEmail);
 		}
 	}
 	
 	/**
-	 * Method to add the email addresses which someone receives from.
+	 * Function to add the email addresses which someone receives from.
 	 * 
-	 * @param record - Made up of "From" address and a List of email address in contact with "From".
+	 * @param record - Made up of an email address and a list neighboring emails.
 	 */
 	public void addEmailsToReceive(Record record) {
 		if (this.email.equals(record.from)) {
@@ -70,7 +73,21 @@ public class Node {
 		} else if (receivedEmails.contains(record.from)) {
 			return;
 		}
+		addNeighbor(record.from);
 		receivedEmails.add(record.from);
 	}
-}
 
+	/**
+	 * Function to add the emaila address as a neighbor.
+	 * 
+	 * @param email - Email address.
+	 */
+	public void addNeighbor(String email) {
+		if (this.email.equals(email)) {
+			return;
+		} else if (neighbors.contains(email)) {
+			return;
+		}
+		neighbors.add(email);
+	}
+}
